@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                                                 String getOpponentName = players.child("player_name").getValue(String.class);
                                                 opponentName = getOpponentName;
                                                 opponentId = players.getKey();
+                                                int a;
 
                                                 //first turn will be of who created the connection
                                                 playerTurn = opponentId;
