@@ -19,19 +19,28 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toStartOf="@id/name"
         android:text="Button"
 
         />
 />
+    <Button
+        android:id="@+id/resetBtn"
+        android:text="reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        >
+    </Button>
 
     <EditText
         android:id="@+id/editTextTextPersonName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_marginLeft="0dp"
         android:ems="10"
         android:inputType="textPersonName"
-        android:text="Name"
- />
+        android:text="Name" />
 
 </RelativeLayout>

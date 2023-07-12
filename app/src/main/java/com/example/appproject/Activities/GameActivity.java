@@ -21,6 +21,7 @@ import com.example.appproject.Model.Blank;
 import com.example.appproject.Model.DrawBoard;
 import com.example.appproject.Model.King;
 import com.example.appproject.Model.Knight;
+import com.example.appproject.Model.Move;
 import com.example.appproject.Model.Pawn;
 import com.example.appproject.Model.Piece;
 import com.example.appproject.Model.Point;
@@ -43,6 +44,8 @@ public class GameActivity extends Activity {
     public static final String START = "KEY_START";
     public static final String CONID = "KEY_CONID";
     public static final String COUNT="KEY_COUNT";
+
+    public static final String COLOR="KEY_COLOR";
     String connectionId="";
     Intent prevIntent;
 
@@ -55,6 +58,7 @@ public class GameActivity extends Activity {
     int color;
     int srcI, srcJ, dstI, dstJ;
     ShapeableImageView[][] board;
+    GameManager.color myColor;
     Button backBtn;
     GameManager gameManager = new GameManager();
     SignalGenerator signalGenerator;
@@ -71,11 +75,16 @@ public class GameActivity extends Activity {
         resetBackgrounds();
         drawBoard();
         waitForGameToStart();
+        determineFirstPlayer();
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                databaseReference.child("connection").removeValue();
+
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra(MainActivity.CONID,connectionId);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 finish();
+                startActivity(intent);
 
             }
         });
@@ -87,6 +96,21 @@ public class GameActivity extends Activity {
 
     }
 
+    private void determineFirstPlayer() {
+        if (prevIntent.getBooleanExtra("KEY_COLOR", false)) {
+            myColor = GameManager.color.WHITE;
+            player1Name.setBackgroundColor(getResources().getColor(R.color.teal_200));
+
+
+        } else {
+            myColor = GameManager.color.BLACK;
+            gameManager.flipBoard();
+            drawBoard();
+            player2Name.setBackgroundColor(getResources().getColor(R.color.teal_200));
+
+        }
+    }
+
 
     private void waitForGameToStart() {
 
@@ -95,17 +119,13 @@ public class GameActivity extends Activity {
             @Override
             public void run() {
                 int playersCount = prevIntent.getIntExtra("KEY_COUNT", 0);
-                if (playersCount == 1) {
-                    signalGenerator.getInstance().toast("waiting for player", Toast.LENGTH_SHORT);
-
-                    if (prevIntent.getStringExtra("KEY_PLAYER1") != null) {
-                        player1Name.setText(prevIntent.getStringExtra("KEY_PLAYER1"));
-
-                    }
-                }
                 if (playersCount == 2) {
                     if (prevIntent.getStringExtra("KEY_PLAYER2") != null) {
                         player2Name.setText(prevIntent.getStringExtra("KEY_PLAYER2"));
+
+                    }
+                    if (prevIntent.getStringExtra("KEY_PLAYER1") != null) {
+                        player1Name.setText(prevIntent.getStringExtra("KEY_PLAYER1"));
 
                     }
                 }
@@ -211,6 +231,7 @@ public class GameActivity extends Activity {
                              //   board[finalI][finalJ].setImageResource(R.drawable.bishop_black);
 
                                 gameManager.move(srcI,srcJ,finalI,finalJ);
+                                updateServerMove(srcI,srcJ,finalI,finalJ);
                                 resetBackgrounds();
                                 drawBoard();
                                 selected=null;
@@ -226,6 +247,13 @@ public class GameActivity extends Activity {
 
 
             }
+
+    private void updateServerMove(int srcI, int srcJ, int dstI, int dstJ) {
+      //  Move move = new Move(srcI,srcJ,dstI,dstJ);
+       DatabaseReference movesRef= databaseReference.child("connection").child("moves").push();
+                movesRef.child(player1Name.toString())
+                .setValue(srcI+"");
+    }
 
     private void paintLegalMoves( Point p) {
 

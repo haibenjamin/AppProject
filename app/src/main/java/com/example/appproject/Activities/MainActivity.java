@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,25 +37,28 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     //player unique id
-    private String playerId="0";
-    private String playerName="";
-    private String opponentName="";
+    private String playerId = "0";
+    private String playerName = "";
+    private String opponentName = "";
 
     // true when opponent was found
-    private boolean opponentFound=false;
+    private boolean opponentFound = false;
     //unique id of opponent
-    private String opponentId ="0";
+    private String opponentId = "0";
 
     // value must be empty, matching or waiting, when a user create a new room and he is waiting for other to join value will be waiting
-    private String status="empty";
-    private String playerTurn="";
+    private String status = "matching";
+    private String playerTurn = "";
     //connection id in which player has joined to play
-    private String connectionId ="";
-    private int playersCount=0;
+    public static String CONID = "KEY_CONID";
+    private String connectionId="";
+    private int playersCount = 0;
+    private boolean gameLoaded = false;
+    private boolean isWhite=false;
     //getting database reference
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReferenceFromUrl("https://appproject-3c98f-default-rtdb.firebaseio.com/");
-//generating value event listener for database
-    ValueEventListener turnsEventListener,wonEventListener;
+    //generating value event listener for database
+    ValueEventListener turnsEventListener, wonEventListener;
 
 
     @Override
@@ -63,16 +67,27 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         EditText editText = findViewById(R.id.editTextTextPersonName);
         Button button = findViewById(R.id.button);
-        TextView textView=findViewById(R.id.name);
+        Button resetBtn = findViewById(R.id.resetBtn);
+        TextView textView = findViewById(R.id.name);
 
         //generate uniqe id
-        playerId= String.valueOf(System.currentTimeMillis());
+        playerId=System.currentTimeMillis()+"";
+        resetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reset();
+            }
+        });
+
 
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 playerName = editText.getText().toString();
+                status="matching";
+                opponentFound=false;
+
                 databaseReference.child("connection").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -80,11 +95,9 @@ public class MainActivity extends AppCompatActivity {
                         if (!opponentFound) {
                             //checking for other players in dataBase
                             if (snapshot.hasChildren()) {
-
                                 for (DataSnapshot connections : snapshot.getChildren()) {
                                     String conId = connections.getKey();
                                     connectionId = conId;
-
                                     playersCount = (int) connections.getChildrenCount();
                                     if (status.equals("waiting")) {
                                         if (playersCount == 2) {
@@ -96,10 +109,12 @@ public class MainActivity extends AppCompatActivity {
                                                 //check if playerid matches who created the lobby
                                                 if (getPlayerId.equals(playerId)) {
                                                     playerFound = true;
+                                                    isWhite=true;
                                                 } else if (playerFound) {
                                                     String getOpponentName = players.child("player_name").getValue(String.class);
-                                                    //assigning connection id
                                                     opponentName = getOpponentName;
+                                                    //assigning connection id
+                                                    opponentId = players.getKey();
                                                     opponentFound = true;
                                                     connectionId = conId;
                                                     //adding turns and won listener to the database reference
@@ -124,8 +139,6 @@ public class MainActivity extends AppCompatActivity {
                                                 String getOpponentName = players.child("player_name").getValue(String.class);
                                                 opponentName = getOpponentName;
                                                 opponentId = players.getKey();
-                                                int a;
-
                                                 //first turn will be of who created the connection
                                                 playerTurn = opponentId;
                                                 applyPlayTurn(playerTurn);
@@ -156,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                                     snapshot.child(connectionId).child(playerId).child(("player_name")).getRef().setValue(playerName);
                                     status = "waiting";
                                 }
-                            } else if (status.equals("empty")) {
+                            } else {
                                 //generate unique room id
                                 connectionId = String.valueOf(System.currentTimeMillis());
                                 //adding first player
@@ -165,18 +178,20 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                         }
-                        else{
+                        Log.d("con id",connectionId+"");
 
-                                Intent i = new Intent(MainActivity.this, GameActivity.class);
-                                i.putExtra(GameActivity.START, true);
-                                i.putExtra(GameActivity.CONID, connectionId);
-                                i.putExtra(GameActivity.PLAYER2, opponentName);
-                                i.putExtra(GameActivity.START, true);
-                                i.putExtra(GameActivity.PLAYER1, playerName);
-                                i.putExtra(GameActivity.COUNT, playersCount);
-                                startActivity(i);
-
-
+                        playersCount = (int) snapshot.child(connectionId).getChildrenCount();
+                        if (playersCount == 2 && !gameLoaded) {
+                            gameLoaded = true;
+                            Intent i = new Intent(MainActivity.this, GameActivity.class);
+                            i.putExtra(GameActivity.START, true);
+                            i.putExtra(GameActivity.CONID, connectionId);
+                            i.putExtra(GameActivity.PLAYER2, opponentName);
+                            i.putExtra(GameActivity.START, true);
+                            i.putExtra(GameActivity.PLAYER1, playerName);
+                            i.putExtra(GameActivity.COUNT, playersCount);
+                            i.putExtra(GameActivity.COLOR,isWhite);
+                            startActivity(i);
                         }
 
 
@@ -187,70 +202,81 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
-                if (playersCount<2){
+                if (playersCount < 2) {
                     SignalGenerator.getInstance().toast("waiting for player", Toast.LENGTH_SHORT);
                 }
 
 
             }
         });
-turnsEventListener=new ValueEventListener() {
-    @Override
-    public void onDataChange(@NonNull DataSnapshot snapshot) {
-        //getting all turns of the connection
-        for (DataSnapshot dataSnapshot: snapshot.getChildren()){
-            if (dataSnapshot.getChildrenCount()==2){
-                //get box position selected by the user
-              //  final int getBoxPosition= Integer.parseInt(dataSnapshot.child("box_position").getValue(String.class));
-                //getting player id who selected the box
-                final String getPlayerId=dataSnapshot.child("player_id").getValue(String.class);
+        turnsEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                //getting all turns of the connection
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    if (dataSnapshot.getChildrenCount() == 2) {
+                        //get box position selected by the user
+                        //  final int getBoxPosition= Integer.parseInt(dataSnapshot.child("box_position").getValue(String.class));
+                        //getting player id who selected the box
+                        final String getPlayerId = dataSnapshot.child("player_id").getValue(String.class);
+                    }
+                }
             }
-        }
-    }
 
-    @Override
-    public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-    }
-};
-wonEventListener = new ValueEventListener() {
-    @Override
-    public void onDataChange(@NonNull DataSnapshot snapshot) {
+            }
+        };
+        wonEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-    }
+            }
 
-    @Override
-    public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-    }
-};
+            }
+        };
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        opponentFound=false;
-        status="empty";
+       // databaseReference.child("connection").removeValue();
+
+
 
     }
+
+    public void reset(){
+        status = "matching";
+        opponentFound = false;
+
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("connection").getRef();
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                for (DataSnapshot objSnapshot: snapshot.getChildren()) {
+                    connectionId = objSnapshot.getKey();
+                    databaseReference.child("connection").child(connectionId).child(playerId).removeValue();
+                    break;
+                }
+             }
+            @Override
+            public void onCancelled(DatabaseError firebaseError) {
+                Log.e("Read failed", firebaseError.getMessage());
+            }
+        });
+
+
+    }
+
+
 
     private void applyPlayTurn(String playerTurn) {
-        if (playerTurn.equals(playerId));
-
-    }
-
-    private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
-        IdpResponse response = result.getIdpResponse();
-        if (result.getResultCode() == RESULT_OK) {
-            // Successfully signed in
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            // ...
-        } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
-        }
+        if (playerTurn.equals(playerId)) ;
     }
 }

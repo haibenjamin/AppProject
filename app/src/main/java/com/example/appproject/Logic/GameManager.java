@@ -102,6 +102,18 @@ public class GameManager {
 
 
     }
+    public void flipBoard(){
+        Piece[][] newBoard = new Piece[ROWS][COLS];
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                newBoard[i][j]=board[ROWS-1-i][COLS-1-j];
+
+            }
+
+        }
+        board=newBoard;
+    }
+
     public void move(int srcI,int srcJ,int dstI,int dstJ){
         board[dstI][dstJ]=board[srcI][srcJ];
         board[srcI][srcJ]=new Blank();
