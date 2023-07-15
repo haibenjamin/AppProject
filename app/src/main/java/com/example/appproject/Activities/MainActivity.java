@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void isConnected(Button stats,Button start) {
         boolean connected=false;
-        connected=getIntent().getBooleanExtra(CONNECTED,true);
+        connected=getIntent().getBooleanExtra(CONNECTED,false);
         if (connected){
             stats.setVisibility(View.VISIBLE);
             start.setVisibility(View.VISIBLE);

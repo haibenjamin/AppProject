@@ -7,15 +7,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Rook extends Piece {
-    private Point currPos;
     private int points;
     private int color;
+    private boolean isMoved;
     //private ArrayList<Point> allowedMoves;
     public Rook(Point currPos,int color){
         super();
-        this.currPos=currPos;
+        setCurrPosition( currPos);
         this.points=points;
         this.color=color;
+        isMoved=false;
        // allowedMoves=new ArrayList<>();
 
         setOptionalMoves();
@@ -100,11 +101,16 @@ public class Rook extends Piece {
     }
 
     public void setCurrPos(Point currPos) {
-        this.currPos = currPos;
     }
 
     @Override
     public int getColor() {
         return this.color;
     }
+    public void setMoved(boolean status){
+        this.isMoved=status;
+    }
+    public boolean getMoved()
+    {return this.isMoved;}
+
 }

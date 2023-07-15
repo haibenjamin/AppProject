@@ -113,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void openMenu() {
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        intent.putExtra(MainActivity.CONNECTED,true);
+        intent.putExtra(MainActivity.CONNECTED,false);
         startActivity(intent);
         finish();
     }

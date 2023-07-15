@@ -6,13 +6,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Bishop extends Piece{
-    private Point currPos;
     private int points;
     private int color;
 
     public Bishop( Point currPos,int color){
         super();
-        this.currPos=currPos;
+        setCurrPosition(currPos);
         this.points=points;
         this.color=color;
         setOptionalMoves();
@@ -22,7 +21,7 @@ public class Bishop extends Piece{
         int tempX=0;
         int tempY=0;
         int minAxis=0;
-
+        Point currPos=getCurrPosition();
         //offset of main diagonal
         minAxis =Math.min(currPos.getX(), currPos.getY());
         tempX-=minAxis;
@@ -116,7 +115,7 @@ public class Bishop extends Piece{
 
     @Override
     public void setCurrPos(Point currPos) {
-        this.currPos=currPos;
+
 
     }
 

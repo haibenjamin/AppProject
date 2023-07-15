@@ -34,6 +34,7 @@ import com.example.appproject.Model.Queen;
 import com.example.appproject.Model.Rook;
 import com.example.appproject.R;
 import com.example.appproject.Utillities.SignalGenerator;
+import com.google.android.gms.dynamic.IFragmentWrapper;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -91,7 +92,8 @@ public class GameActivity extends Activity {
         setContentView(R.layout.activity_board);
         prevIntent = getIntent();
         initView();
-        resetBackgrounds();
+        resetBackgrounds(); //resets tiles colors on board
+        resetCastlingRight();
         drawBoard();
         setName();
         determineFirstPlayer();
@@ -107,20 +109,15 @@ public class GameActivity extends Activity {
                 gameOver();
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(MainActivity.CONID,connectionId);
-              //  intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra(MainActivity.CONNECTED,true);
                 myTurn=false;
                 finish();
                 startActivity(intent);
             }
         });
+    }
 
-
-
-        //  drawView = new DrawBoard(this);
-        //  drawView.setBackgroundColor(Color.WHITE);
-        //  setContentView(drawView);
-
+    private void resetCastlingRight() {
     }
 
     public void gameOver(){
@@ -233,6 +230,7 @@ public class GameActivity extends Activity {
             drawBoard();
 
         }
+        gameManager.getBoard();
     }
 
 
@@ -333,8 +331,22 @@ public class GameActivity extends Activity {
     private void makeMove(int srcI, int srcJ, int dstI, int dstJ,String name) {
         gameManager.move(srcI,srcJ,dstI,dstJ);
         updateServerMove(srcI,srcJ,dstI,dstJ,name);
+        updateIsMoved(srcI,srcJ);
         gameManager.setPiecePosition();
         myTurn=false;
+        resetBackgrounds();
+        drawBoard();
+
+    }
+
+    private void updateIsMoved(int x, int y) {
+        Piece piece = gameManager.getPiece(x,y);
+        if (piece instanceof Rook){
+            ((Rook) piece).setMoved(true);
+        }
+        if (piece instanceof King){
+            ((King) piece).setMoved(true);
+        }
     }
 
 
@@ -416,8 +428,7 @@ public class GameActivity extends Activity {
                         @SuppressLint("ResourceType")
                         @Override
                         public void onClick(View v) {
-                            //waitForGameToStart();
-                            if (selected==null){
+                            if (selected==null){//no piece is selected on board
                                 selected=board[finalI][finalJ];
                                 selected.setBackgroundColor(R.color.green_100);
                                 srcI=finalI;
@@ -425,16 +436,26 @@ public class GameActivity extends Activity {
                                 paintLegalMoves( new Point(srcI,srcJ));
 
                             }
-                            else{
+                            else{ //piece is allready selected
+                                if (selected!=board[finalI][finalJ]) { // if different tile is selected
+                                    if (legalMove(srcI, srcJ, finalI, finalJ)) { // is it legal move ?
+                                        if (!(gameManager.getPiece(srcI,srcJ) instanceof King)) {
+                                            makeMove(srcI, srcJ, finalI, finalJ, playerName);
+                                            firstMove();
+                                            selected = null;
 
-                             //   board[finalI][finalJ].setImageResource(R.drawable.bishop_black);
-                                if (selected!=board[finalI][finalJ]) {
-                                    if (legalMove(srcI, srcJ, finalI, finalJ)) {
-                                        makeMove(srcI, srcJ, finalI, finalJ, playerName);
-                                        firstMove();
-                                        resetBackgrounds();
-                                        drawBoard();
-                                        selected = null;
+                                        }else{ //special case for king castling
+                                            if (srcJ==finalJ-2){
+                                                castlingShort(srcI,srcJ);
+                                                selected=null;
+                                                firstMove();
+                                            }
+                                            else{
+                                                makeMove(srcI,srcJ,finalI,finalJ,playerName);
+                                                firstMove();
+                                                selected = null;
+                                            }
+                                        }
                                     } else if (gameManager.getBoard()[finalI][finalJ].getColor() == myColor.ordinal()) {
                                         unPaintLegalMoves(new Point(srcI, srcJ));
                                         selected = board[finalI][finalJ];
@@ -446,12 +467,7 @@ public class GameActivity extends Activity {
                                     } else if (legalMove(srcI, srcJ, finalI, finalJ)) {
                                         makeMove(srcI, srcJ, finalI, finalJ, playerName);
                                         firstMove();
-                                        resetBackgrounds();
-                                        drawBoard();
                                         selected = null;
-
-
-
                                     }
                                 }
                                 else{
@@ -472,6 +488,13 @@ public class GameActivity extends Activity {
 
 
             }
+
+    private void castlingShort(int x,int y) {
+        King piece = (King)gameManager.getPiece(x,y);
+        makeMove(x,y,x,y+2,playerName);
+        makeMove(x,y+3,x,y+1,playerName);
+        piece.setMoved(true);
+    }
 
     private boolean legalMove(int srcI, int srcJ, int dstI, int dstJ) {
         Point target = new Point(dstI, dstJ);

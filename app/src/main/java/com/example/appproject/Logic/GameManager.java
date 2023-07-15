@@ -26,10 +26,13 @@ public class GameManager {
     public enum pieces{BLACK_PAWN,BLACK_KNIGHT,BLACK_BISHOP,BLACK_ROOK,
         BLACK_QUEEN,BLACK_KING,BLANK,
     WHITE_PAWN,WHITE_KNIGHT,WHITE_BISHOP,WHITE_QUEEN,WHITE_KING,WHITE_ROOK};
-
+    private boolean castlingBlack;
+    private boolean castlingWhite;
 
     public GameManager() {
         this.board = new Piece[ROWS][COLS];
+        castlingBlack=false;
+        castlingWhite=false;
         fillBoard();
     }
     public Piece[][] getBoard(){
@@ -108,7 +111,7 @@ public class GameManager {
         Piece[][] newBoard = new Piece[ROWS][COLS];
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                newBoard[i][j]=board[ROWS-1-i][COLS-1-j];
+                  newBoard[i][j]=board[ROWS-1-i][COLS-1-j];
             }
 
         }
@@ -172,7 +175,7 @@ public class GameManager {
         }
         //King
         if (selectedPiece instanceof King){
-            if (selectedPiece instanceof Pawn){
+            if (selectedPiece instanceof King){
                 optionalMoves=((King) selectedPiece).AllowedMoves(p,board);
 
             }
@@ -199,6 +202,14 @@ public class GameManager {
 
         return legalMoves;
     }
+    public Piece getPiece(int x,int y){
+        return board[x][y];
+    }
+    public Piece getPiece(Point p){
+        return board[p.getX()][p.getY()];
+    }
+
+
 
     public ArrayList<Piece> getBlackPieces (){
         ArrayList<Piece> blackPieces = new ArrayList<>();

@@ -1,19 +1,23 @@
 package com.example.appproject.Model;
 
+import com.example.appproject.Activities.GameActivity;
+import com.example.appproject.Activities.MainActivity;
 import com.example.appproject.Logic.GameManager;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class King extends Piece{
-    private Point currPos;
+   // private Point currPos;
     private int points;
     private int color;
+    private boolean isMoved;
     public King(Point currPos,int color){
         super();
-        this.currPos=currPos;
+       setCurrPosition(currPos);
         this.points=points;
         this.color=color;
+        isMoved=false;
         setOptionalMoves();
 
 
@@ -23,6 +27,7 @@ public class King extends Piece{
     @Override
     public void setOptionalMoves() {
         //upper bound
+        Point currPos=getCurrPosition();
         if(currPos.getX()+1<= GameManager.getROWS()){
             optionalMoves.add(new Point(currPos.getX()+1, currPos.getY()));
             if (currPos.getY()-1>0)
@@ -109,7 +114,7 @@ public class King extends Piece{
             }
         }
 
-        if((coordinates.getX()-1) <8 ){
+        if((coordinates.getX()-1) >=0 ){
             if(board[coordinates.getX()-1][coordinates.getY()] instanceof Blank){
                 c = new Point(coordinates.getX()-1 , coordinates.getY());
                 allowedMoves.add(c);
@@ -145,7 +150,7 @@ public class King extends Piece{
             }
         }
 
-        if((coordinates.getX()-1) <8 && (coordinates.getY()-1)>=0){
+        if((coordinates.getX()-1) >=0 && (coordinates.getY()-1)>=0){
             if(board[coordinates.getX()-1][coordinates.getY()-1] instanceof Blank){
                 c = new Point(coordinates.getX()-1 , coordinates.getY()-1);
                 allowedMoves.add(c);
@@ -156,12 +161,45 @@ public class King extends Piece{
                 }
             }
         }
+        if (!isMoved) {
+            Point currPos=getCurrPosition();
+            if (GameActivity.myTurn) {
+                if (color == GameManager.color.WHITE.ordinal()) {
+                    if (board[currPos.getX()][currPos.getY() + 3] instanceof Rook) {
+                        if (!((Rook) board[currPos.getX()][currPos.getY() + 3]).getMoved()) {
+                            if (board[currPos.getX()][currPos.getY() + 1] instanceof Blank) {
+                                if (board[currPos.getX()][currPos.getY() + 2] instanceof Blank) {
+                                    allowedMoves.add(new Point(currPos.getX(), currPos.getY() + 2));
+                                }
+
+                            }
+                        }
 
 
+                    }
+                }else{ //my turn&& black
+                    if (board[currPos.getX()][currPos.getY() - 3] instanceof Rook) {
+                        if (!((Rook) board[currPos.getX()][currPos.getY() - 3]).getMoved()) {
+                            if (board[currPos.getX()][currPos.getY() - 1] instanceof Blank) {
+                                if (board[currPos.getX()][currPos.getY() - 2] instanceof Blank) {
+                                    allowedMoves.add(new Point(currPos.getX(), currPos.getY() - 2));
+                                }
 
+                            }
+                        }
+
+
+                    }
+
+
+                }
+            }
+        }
         return allowedMoves;
     }
-
+public boolean getMoved(){
+        return this.isMoved;
+}
 
 
     @Override
@@ -178,5 +216,9 @@ public class King extends Piece{
     @Override
     public int getColor() {
         return this.color;
+    }
+    public void setMoved(boolean status){
+        isMoved=status;
+
     }
 }
