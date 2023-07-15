@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                    Intent intent = new Intent(MainActivity.this,GameActivity.class);
+                    Intent intent = new Intent(MainActivity.this,ColorActivity.class);
                     intent.putExtra(GameActivity.PLAYER_NAME,playerName);
                     startActivity(intent);
                     finish();
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void isConnected(Button stats,Button start) {
         boolean connected=false;
-        connected=getIntent().getBooleanExtra(CONNECTED,false);
+        connected=getIntent().getBooleanExtra(CONNECTED,true);
         if (connected){
             stats.setVisibility(View.VISIBLE);
             start.setVisibility(View.VISIBLE);

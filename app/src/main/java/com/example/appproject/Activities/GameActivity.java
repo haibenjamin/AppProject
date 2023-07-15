@@ -75,7 +75,8 @@ public class GameActivity extends Activity {
     int color;
     int srcI, srcJ, dstI, dstJ;
     ShapeableImageView[][] board;
-    GameManager.color myColor;
+     GameManager.color myColor;
+    public static boolean myTurn=false;
     Button resignBtn;
     GameManager gameManager = new GameManager();
     SignalGenerator signalGenerator;
@@ -93,9 +94,10 @@ public class GameActivity extends Activity {
         resetBackgrounds();
         drawBoard();
         setName();
+        determineFirstPlayer();
         waitForGameToStart();
         movesListener();
-        determineFirstPlayer();
+
 
         resignBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,8 +107,9 @@ public class GameActivity extends Activity {
                 gameOver();
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(MainActivity.CONID,connectionId);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+              //  intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra(MainActivity.CONNECTED,true);
+                myTurn=false;
                 finish();
                 startActivity(intent);
             }
@@ -221,6 +224,7 @@ public class GameActivity extends Activity {
     private void determineFirstPlayer() {
         if (prevIntent.getBooleanExtra("KEY_COLOR", false)) {
             myColor = GameManager.color.WHITE;
+            myTurn=true;
 
 
         } else {
@@ -250,8 +254,8 @@ public class GameActivity extends Activity {
 
                     }
                 }*/
-                firstMove();
-                //changeTurn();
+                if (!myTurn)
+                    firstMove();
                 drawBoard();
             }
 
@@ -268,6 +272,7 @@ public class GameActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                myTurn=true;
 
 
             }
@@ -292,6 +297,7 @@ public class GameActivity extends Activity {
         }
         else{
             makeRandomMove();
+            changeTurn();
         }
 
     }
@@ -304,6 +310,9 @@ public class GameActivity extends Activity {
 
         if (myColor==GameManager.color.BLACK){
             myPieces= gameManager.getWhitePieces();
+        }
+        else{
+            myPieces=gameManager.getBlackPieces();
         }
 
         if (myPieces!=null){
@@ -325,6 +334,7 @@ public class GameActivity extends Activity {
         gameManager.move(srcI,srcJ,dstI,dstJ);
         updateServerMove(srcI,srcJ,dstI,dstJ,name);
         gameManager.setPiecePosition();
+        myTurn=false;
     }
 
 
@@ -419,12 +429,30 @@ public class GameActivity extends Activity {
 
                              //   board[finalI][finalJ].setImageResource(R.drawable.bishop_black);
                                 if (selected!=board[finalI][finalJ]) {
-                                    gameManager.move(srcI, srcJ, finalI, finalJ);
-                                    updateServerMove(srcI, srcJ, finalI, finalJ, playerName);
-                                    firstMove();
-                                    resetBackgrounds();
-                                    drawBoard();
-                                    selected = null;
+                                    if (legalMove(srcI, srcJ, finalI, finalJ)) {
+                                        makeMove(srcI, srcJ, finalI, finalJ, playerName);
+                                        firstMove();
+                                        resetBackgrounds();
+                                        drawBoard();
+                                        selected = null;
+                                    } else if (gameManager.getBoard()[finalI][finalJ].getColor() == myColor.ordinal()) {
+                                        unPaintLegalMoves(new Point(srcI, srcJ));
+                                        selected = board[finalI][finalJ];
+                                        selected.setBackgroundColor(R.color.green_100);
+                                        srcI = finalI;
+                                        srcJ = finalJ;
+                                        resetBackgrounds();
+                                        paintLegalMoves(new Point(srcI, srcJ));
+                                    } else if (legalMove(srcI, srcJ, finalI, finalJ)) {
+                                        makeMove(srcI, srcJ, finalI, finalJ, playerName);
+                                        firstMove();
+                                        resetBackgrounds();
+                                        drawBoard();
+                                        selected = null;
+
+
+
+                                    }
                                 }
                                 else{
                                     resetBackgrounds();
@@ -445,6 +473,22 @@ public class GameActivity extends Activity {
 
             }
 
+    private boolean legalMove(int srcI, int srcJ, int dstI, int dstJ) {
+        Point target = new Point(dstI, dstJ);
+        Point src = new Point(srcI, srcJ);
+        Set<Point> legalMoves = gameManager.getLegalMoves(src);
+        for (Point point : legalMoves) {
+            if (point.getX() == target.getX()) {
+                if (point.getY() == target.getY()) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
+
     private void updateServerMove(int srcI, int srcJ, int dstI, int dstJ,String name) {
       //  Move move = new Move(srcI,srcJ,dstI,dstJ);
        DatabaseReference movesRef= databaseReference.child("connection").child("moves").push();
@@ -460,10 +504,11 @@ public class GameActivity extends Activity {
         for (Point point: gameManager.getLegalMoves(p)
              ) {
            // board[point.getX()][point.getY()].setBackgroundColor(Color.GREEN);
-            board[point.getX()][point.getY()].setImageResource(R.drawable.circle);
-
-
-            
+            if (gameManager.getBoard()[point.getX()][point.getY()] instanceof Blank)
+                board[point.getX()][point.getY()].setImageResource(R.drawable.circle);
+            else{
+                board[point.getX()][point.getY()].setBackgroundColor(getResources().getColor(R.color.teal_200));
+            }
         }
 
     }
@@ -491,8 +536,11 @@ public class GameActivity extends Activity {
         for (Point point: gameManager.getLegalMoves(p)
         ) {
             // board[point.getX()][point.getY()].setBackgroundColor(Color.GREEN);
-            board[point.getX()][point.getY()].setImageResource(0);
-
+          //
+            if (gameManager.getBoard()[point.getX()][point.getY()] instanceof Blank)
+                board[point.getX()][point.getY()].setImageResource(0);
+            else
+                resetBackgrounds();
 
         }
 

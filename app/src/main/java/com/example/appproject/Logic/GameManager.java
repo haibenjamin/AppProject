@@ -191,7 +191,7 @@ public class GameManager {
         optionalMoves.clear();
         setOptionalMoves(point);
         for(Point p :optionalMoves){
-            if (board[p.getX()][p.getY()] instanceof Blank || board[p.getX()][p.getY()].getColor()!=board[p.getX()][p.getY()].getColor()){
+            if (board[p.getX()][p.getY()] instanceof Blank || board[p.getX()][p.getY()].getColor()!=board[point.getX()][point.getY()].getColor()){
                 this.legalMoves.add(p);
             }
 
