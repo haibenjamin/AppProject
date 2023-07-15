@@ -3,6 +3,8 @@ package com.example.appproject.Activities;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -73,7 +76,6 @@ public class GameActivity extends Activity {
     int srcI, srcJ, dstI, dstJ;
     ShapeableImageView[][] board;
     GameManager.color myColor;
-    Button backBtn;
     Button resignBtn;
     GameManager gameManager = new GameManager();
     SignalGenerator signalGenerator;
@@ -94,18 +96,7 @@ public class GameActivity extends Activity {
         waitForGameToStart();
         movesListener();
         determineFirstPlayer();
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.putExtra(MainActivity.CONID,connectionId);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                finish();
-                startActivity(intent);
-
-            }
-        });
         resignBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -230,14 +221,12 @@ public class GameActivity extends Activity {
     private void determineFirstPlayer() {
         if (prevIntent.getBooleanExtra("KEY_COLOR", false)) {
             myColor = GameManager.color.WHITE;
-            player1Name.setBackgroundColor(getResources().getColor(R.color.teal_200));
 
 
         } else {
             myColor = GameManager.color.BLACK;
             gameManager.flipBoard();
             drawBoard();
-            player2Name.setBackgroundColor(turnColor);
 
         }
     }
@@ -279,20 +268,7 @@ public class GameActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (player1Name.getBackground() instanceof ColorDrawable) {
-                    if (((ColorDrawable) player1Name.getBackground()).getColor()==turnColor){
-                        player1Name.setBackgroundColor(Color.TRANSPARENT);
-                        player2Name.setBackgroundColor(turnColor);
-                    }
 
-                }
-                else if (player2Name.getBackground() instanceof ColorDrawable) {
-                    if (((ColorDrawable) player2Name.getBackground()).getColor()==turnColor){
-                        player2Name.setBackgroundColor(Color.TRANSPARENT);
-                        player1Name.setBackgroundColor(turnColor);
-                    }
-
-                }
 
             }
         },10);
@@ -433,7 +409,7 @@ public class GameActivity extends Activity {
                             //waitForGameToStart();
                             if (selected==null){
                                 selected=board[finalI][finalJ];
-                                selected.setBackgroundColor(R.color.teal_200);
+                                selected.setBackgroundColor(R.color.green_100);
                                 srcI=finalI;
                                 srcJ=finalJ;
                                 paintLegalMoves( new Point(srcI,srcJ));
@@ -486,10 +462,29 @@ public class GameActivity extends Activity {
            // board[point.getX()][point.getY()].setBackgroundColor(Color.GREEN);
             board[point.getX()][point.getY()].setImageResource(R.drawable.circle);
 
+
             
         }
 
     }
+
+    private void shrinkImage(ShapeableImageView img) {
+        img.setAlpha(100);
+
+        Bitmap originalBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.circle);
+
+// Set the desired width and height for the scaled image
+        int desiredWidth = 200;
+        int desiredHeight = 200;
+
+// Create a scaled version of the original image
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, desiredWidth, desiredHeight, true);
+
+// Set the scaled bitmap to an ImageView
+        img.setImageBitmap(scaledBitmap);
+
+    }
+
     private void unPaintLegalMoves( Point p) {
 
         //Set<Point> points = piece.getLegalMoves();
@@ -509,7 +504,6 @@ public class GameActivity extends Activity {
         player1Name=findViewById(R.id.player1_id);
         player2Name=findViewById(R.id.player2_id);
         player1Rating = findViewById(R.id.player1_rating);
-        backBtn=findViewById(R.id.back_button);
         resignBtn=findViewById(R.id.resign_btn);
         board=new ShapeableImageView[][]{
                 {findViewById(R.id.board00),findViewById(R.id.board01),findViewById(R.id.board02),findViewById(R.id.board03),
