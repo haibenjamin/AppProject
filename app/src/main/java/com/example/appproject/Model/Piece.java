@@ -1,5 +1,9 @@
 package com.example.appproject.Model;
 
+import com.example.appproject.Activities.GameActivity;
+import com.example.appproject.Activities.MainActivity;
+import com.example.appproject.Logic.GameManager;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,7 +27,13 @@ public abstract class Piece implements Moveable {
         this.optionalMoves=optionalMoves;
 
     }
+    public void setCurrPosition(Point pos){
+        currPosition=pos;
+    }
 
 
+    public Point getCurrPosition() {
+        return currPosition;
+    }
 
-}
+    }

@@ -16,4 +16,11 @@ public class Point {
     public int getY() {
         return y;
     }
+    public void switchVal(){
+        int temp;
+        temp=x;
+        x=y;
+        y=temp;
+
+    }
 }

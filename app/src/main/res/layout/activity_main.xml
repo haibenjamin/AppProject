@@ -20,9 +20,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toStartOf="@id/name"
-        android:text="Button"
+        android:text="Start"
 
         />
+    <Button
+        android:id="@+id/signBtn"
+        android:text="Sign Up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/button"
+        >
+    </Button>
+    <Button
+        android:id="@+id/loginBtn"
+        android:text="Login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/signBtn"
+        >
+    </Button>
 />
     <Button
         android:id="@+id/resetBtn"
@@ -32,6 +48,13 @@
         android:layout_alignParentBottom="true"
         >
     </Button>
+    <Button
+        android:id="@+id/statsBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button"
+        android:text="statistics">
+</Button>
 
     <EditText
         android:id="@+id/editTextTextPersonName"

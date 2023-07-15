@@ -69,6 +69,10 @@ public class MainActivity extends AppCompatActivity {
         Button button = findViewById(R.id.button);
         Button resetBtn = findViewById(R.id.resetBtn);
         TextView textView = findViewById(R.id.name);
+        Button signBtn = findViewById(R.id.signBtn);
+        Button loginBtn = findViewById(R.id.loginBtn);
+        Button statsBtn = findViewById(R.id.statsBtn);
+
 
         //generate uniqe id
         playerId=System.currentTimeMillis()+"";
@@ -78,6 +82,16 @@ public class MainActivity extends AppCompatActivity {
                 reset();
             }
         });
+        statsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,StatsActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+
 
 
 
@@ -85,10 +99,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 playerName = editText.getText().toString();
+                if (playerName.isEmpty()){
+                    SignalGenerator.getInstance().toast("please enter player name",Toast.LENGTH_SHORT);
+                }else{
+                    Intent intent = new Intent(MainActivity.this,GameActivity.class);
+                    intent.putExtra(GameActivity.PLAYER_NAME,playerName);
+                    startActivity(intent);
+                    finish();
+                }
+
                 status="matching";
                 opponentFound=false;
 
-                databaseReference.child("connection").addValueEventListener(new ValueEventListener() {
+             /*   databaseReference.child("connection").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         //look for opponent
@@ -204,8 +227,26 @@ public class MainActivity extends AppCompatActivity {
                 });
                 if (playersCount < 2) {
                     SignalGenerator.getInstance().toast("waiting for player", Toast.LENGTH_SHORT);
-                }
+                }*/
 
+
+            }
+        });
+        signBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,SignUpActivity.class);
+                startActivity(intent);
+                finish();
+
+            }
+        });
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
+                finish();
 
             }
         });

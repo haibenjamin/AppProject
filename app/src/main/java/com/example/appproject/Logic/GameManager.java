@@ -11,6 +11,7 @@ import com.example.appproject.Model.Queen;
 import com.example.appproject.Model.Rook;
 import com.example.appproject.R;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -99,6 +100,7 @@ public class GameManager {
         board[ROWS-1][6]=new Knight(new Point(0,6),color.BLACK.ordinal());
 
         board[ROWS-1][7]=new Rook(new Point(0,7),color.BLACK.ordinal());
+        setPiecePosition();
 
 
     }
@@ -107,18 +109,36 @@ public class GameManager {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 newBoard[i][j]=board[ROWS-1-i][COLS-1-j];
-
             }
 
         }
         board=newBoard;
+        setPiecePosition();
     }
+
+    public boolean gameOver(){
+        return false;
+
+    }
+
 
     public void move(int srcI,int srcJ,int dstI,int dstJ){
         board[dstI][dstJ]=board[srcI][srcJ];
         board[srcI][srcJ]=new Blank();
 
     }
+    public void setPiecePosition(){
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                if (!(board[i][j]instanceof Blank)){
+                    board[i][j].setCurrPosition(new Point(i,j));
+                }
+
+            }
+
+        }
+    }
+
 
     public void setOptionalMoves(Point p) {
         Piece selectedPiece;
@@ -127,30 +147,40 @@ public class GameManager {
 
         //Rook
         if (selectedPiece instanceof Rook){
-            for (int i = 0; i < ROWS; i++) {
-                this.optionalMoves.add(new Point(i,p.getY()));
-                this.optionalMoves.add(new Point(p.getX(),i));
-            }
+           // for (int i = 0; i < ROWS; i++) {
+             //   this.optionalMoves.add(new Point(i,p.getY()));
+              //  this.optionalMoves.add(new Point(p.getX(),i));
+
+            //}
+            optionalMoves=((Rook) selectedPiece).AllowedMoves(p,board);
 
         }
         //Bishop
         if (selectedPiece instanceof Bishop){
+            optionalMoves=((Bishop) selectedPiece).AllowedMoves(p,board);
 
         }
         //Knight
         if (selectedPiece instanceof Knight){
+            optionalMoves=((Knight) selectedPiece).AllowedMoves(p,board);
 
         }
         //Queen
         if (selectedPiece instanceof Queen){
+            optionalMoves=((Queen) selectedPiece).AllowedMoves(p,board);
 
         }
         //King
         if (selectedPiece instanceof King){
+            if (selectedPiece instanceof Pawn){
+                optionalMoves=((King) selectedPiece).AllowedMoves(p,board);
+
+            }
 
         }
         //Pawn
         if (selectedPiece instanceof Pawn){
+            optionalMoves=((Pawn) selectedPiece).AllowedMoves(p,board);
 
         }
 
@@ -164,8 +194,43 @@ public class GameManager {
             if (board[p.getX()][p.getY()] instanceof Blank || board[p.getX()][p.getY()].getColor()!=board[p.getX()][p.getY()].getColor()){
                 this.legalMoves.add(p);
             }
+
         }
+
         return legalMoves;
+    }
+
+    public ArrayList<Piece> getBlackPieces (){
+        ArrayList<Piece> blackPieces = new ArrayList<>();
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                if (!(board[i][j] instanceof Blank)){
+                    if (board[i][j].getColor()==color.BLACK.ordinal()){
+                        blackPieces.add(board[i][j]);
+
+                    }
+                }
+
+            }
+
+        }
+        return blackPieces;
+    }
+    public ArrayList<Piece> getWhitePieces (){
+        ArrayList<Piece> whitePieces = new ArrayList<>();
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                if (!(board[i][j] instanceof Blank)){
+                    if (board[i][j].getColor()==color.WHITE.ordinal()){
+                        whitePieces.add(board[i][j]);
+
+                    }
+                }
+
+            }
+
+        }
+        return whitePieces;
     }
 
 }
