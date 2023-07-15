@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private String playerTurn = "";
     //connection id in which player has joined to play
     public static String CONID = "KEY_CONID";
+    public static final String CONNECTED="KEY_CONNECTED";
     private String connectionId="";
     private int playersCount = 0;
     private boolean gameLoaded = false;
@@ -65,23 +66,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        EditText editText = findViewById(R.id.editTextTextPersonName);
-        Button button = findViewById(R.id.button);
-        Button resetBtn = findViewById(R.id.resetBtn);
-        TextView textView = findViewById(R.id.name);
-        Button signBtn = findViewById(R.id.signBtn);
-        Button loginBtn = findViewById(R.id.loginBtn);
-        Button statsBtn = findViewById(R.id.statsBtn);
+        Button startBtn = findViewById(R.id.btnStartGame);
+        Button loginBtn = findViewById(R.id.btnSignIn);
+        Button signBtn = findViewById(R.id.btnSignUp);
+        Button statsBtn = findViewById(R.id.btnStatistics);
+        isConnected(statsBtn,startBtn);
 
 
         //generate uniqe id
         playerId=System.currentTimeMillis()+"";
-        resetBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                reset();
-            }
-        });
         statsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,21 +88,18 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        button.setOnClickListener(new View.OnClickListener() {
+        startBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                playerName = editText.getText().toString();
-                if (playerName.isEmpty()){
-                    SignalGenerator.getInstance().toast("please enter player name",Toast.LENGTH_SHORT);
-                }else{
+
                     Intent intent = new Intent(MainActivity.this,GameActivity.class);
                     intent.putExtra(GameActivity.PLAYER_NAME,playerName);
                     startActivity(intent);
                     finish();
-                }
 
-                status="matching";
-                opponentFound=false;
+
+                //status="matching";
+            //    opponentFound=false;
 
              /*   databaseReference.child("connection").addValueEventListener(new ValueEventListener() {
                     @Override
@@ -281,6 +271,16 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+    }
+
+    private void isConnected(Button stats,Button start) {
+        boolean connected=false;
+        connected=getIntent().getBooleanExtra(CONNECTED,false);
+        if (connected){
+            stats.setVisibility(View.VISIBLE);
+            start.setVisibility(View.VISIBLE);
+
+        }
     }
 
     @Override

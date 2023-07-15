@@ -51,6 +51,7 @@ public class GameActivity extends Activity {
     public static final String CONID = "KEY_CONID";
     public static final String COUNT="KEY_COUNT";
     public static final String COLOR="KEY_COLOR";
+
     public int turnColor;
     private boolean flagLoses=false;
     private boolean flagRating=false;
@@ -114,6 +115,7 @@ public class GameActivity extends Activity {
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(MainActivity.CONID,connectionId);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra(MainActivity.CONNECTED,true);
                 finish();
                 startActivity(intent);
             }

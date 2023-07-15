@@ -40,6 +40,7 @@ public class StatsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(StatsActivity.this,MainActivity.class);
+                intent.putExtra(MainActivity.CONNECTED,true);
                 startActivity(intent);
                 finish();
             }
