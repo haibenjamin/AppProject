@@ -446,7 +446,11 @@ public class GameActivity extends Activity {
 
                                         }else{ //special case for king castling
                                             if (srcJ==finalJ-2){
-                                                castlingShort(srcI,srcJ);
+                                                castlingShortWhite(srcI,srcJ);
+                                                selected=null;
+                                                firstMove();
+                                            }else if(finalJ==srcJ-2){
+                                                castlingShortBlack(srcI,srcJ);
                                                 selected=null;
                                                 firstMove();
                                             }
@@ -489,7 +493,14 @@ public class GameActivity extends Activity {
 
             }
 
-    private void castlingShort(int x,int y) {
+    private void castlingShortBlack(int x, int y) {
+        King piece = (King)gameManager.getPiece(x,y);
+        makeMove(x,y,x,y-2,playerName);
+        makeMove(x,y-3,x,y-1,playerName);
+        piece.setMoved(true);
+    }
+
+    private void castlingShortWhite(int x,int y) {
         King piece = (King)gameManager.getPiece(x,y);
         makeMove(x,y,x,y+2,playerName);
         makeMove(x,y+3,x,y+1,playerName);
