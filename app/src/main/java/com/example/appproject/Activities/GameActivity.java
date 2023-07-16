@@ -33,6 +33,7 @@ import com.example.appproject.Model.Point;
 import com.example.appproject.Model.Queen;
 import com.example.appproject.Model.Rook;
 import com.example.appproject.R;
+import com.example.appproject.Utillities.MyMediaPlayer;
 import com.example.appproject.Utillities.SignalGenerator;
 import com.google.android.gms.dynamic.IFragmentWrapper;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -116,6 +117,11 @@ public class GameActivity extends Activity {
                 startActivity(intent);
             }
         });
+    }
+    public void clickingSound(){
+        MyMediaPlayer mp = new MyMediaPlayer();
+        mp.playAudioFile(getApplicationContext(),R.raw.click);
+
     }
 
     private void resetCastlingRight() {
@@ -368,6 +374,7 @@ public class GameActivity extends Activity {
     private void makeMove(int srcI, int srcJ, int dstI, int dstJ,String name) {
         int srcColor=gameManager.getBoard()[srcI][srcJ].getColor();
         isGameOver(srcColor,dstI,dstJ);
+        clickingSound();
         gameManager.move(srcI,srcJ,dstI,dstJ);
         updateServerMove(srcI,srcJ,dstI,dstJ,name);
         updateIsMoved(srcI,srcJ);
