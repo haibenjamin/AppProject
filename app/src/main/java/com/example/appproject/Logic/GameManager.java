@@ -202,6 +202,26 @@ public class GameManager {
 
         return legalMoves;
     }
+    public boolean isCheckWhite(){
+        Point kingPos=null;
+        for (Piece piece :getWhitePieces()){
+            if (piece instanceof King)
+                kingPos=piece.getCurrPosition();
+
+        }
+        if (kingPos==null)
+            return false;
+        else{
+            for (Piece piece :getBlackPieces()){
+                if (piece.getCurrPosition().getX()== kingPos.getX() && piece.getCurrPosition().getY()==kingPos.getY()){
+                    return true;
+                }
+            }
+        }
+        return false;
+
+    }
+
     public Piece getPiece(int x,int y){
         return board[x][y];
     }

@@ -32,6 +32,7 @@
             android:textSize="30dp"
             android:textStyle="bold"
             android:textColor="@color/black"
+            android:background="@color/purple_200"
             android:textColorHint="#99000000" />
         <TextView
             android:id="@+id/stats_name_txt"
@@ -41,6 +42,7 @@
             android:hint="000"
             android:textSize="30dp"
             android:textStyle="bold"
+
             android:textColor="@color/black"
             android:textColorHint="#99000000" />
 
@@ -54,6 +56,7 @@
             android:textSize="30dp"
             android:textStyle="bold"
             android:textColor="@color/black"
+            android:background="@color/purple_200"
             android:textColorHint="#99000000" />
         <TextView
             android:id="@+id/wins_txt"
@@ -74,6 +77,7 @@
             android:ems="10"
             android:textSize="30dp"
             android:hint="Loses"
+            android:background="@color/purple_200"
             android:inputType="textPersonName"
             android:textColor="@color/black"
             android:textColorHint="#99000000" />
@@ -94,6 +98,7 @@
             android:layout_height="match_parent"
             android:ems="10"
             android:hint="Rating"
+            android:background="@color/purple_200"
             android:textSize="30dp"
             android:textStyle="bold"
             android:textColor="@color/black"

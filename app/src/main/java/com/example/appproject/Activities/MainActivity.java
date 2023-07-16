@@ -70,11 +70,20 @@ public class MainActivity extends AppCompatActivity {
         Button loginBtn = findViewById(R.id.btnSignIn);
         Button signBtn = findViewById(R.id.btnSignUp);
         Button statsBtn = findViewById(R.id.btnStatistics);
-        isConnected(statsBtn,startBtn);
+        Button changeBtn = findViewById(R.id.btnChangePlayer);
+        isConnected(statsBtn,startBtn,loginBtn,signBtn,changeBtn);
 
 
         //generate uniqe id
         playerId=System.currentTimeMillis()+"";
+        changeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
         statsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -273,12 +282,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void isConnected(Button stats,Button start) {
+    private void isConnected(Button stats,Button start,Button login,Button sign,Button change) {
         boolean connected=false;
         connected=getIntent().getBooleanExtra(CONNECTED,false);
         if (connected){
             stats.setVisibility(View.VISIBLE);
             start.setVisibility(View.VISIBLE);
+            login.setVisibility(View.GONE);
+            sign.setVisibility(View.GONE);
+            change.setVisibility(View.VISIBLE);
+
+
 
         }
     }

@@ -58,6 +58,7 @@ public class GameActivity extends Activity {
 
     public int turnColor;
     private boolean flagLoses=false;
+    private boolean flagWins=false;
     private boolean flagRating=false;
     String connectionId="";
     String playerName;
@@ -106,7 +107,7 @@ public class GameActivity extends Activity {
             public void onClick(View v) {
                 SignalGenerator.getInstance().toast("you lost",Toast.LENGTH_SHORT);
                 gameManager.gameOver();
-                gameOver();
+                gameLost();
                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 intent.putExtra(MainActivity.CONID,connectionId);
                 intent.putExtra(MainActivity.CONNECTED,true);
@@ -119,8 +120,44 @@ public class GameActivity extends Activity {
 
     private void resetCastlingRight() {
     }
+    private void gameWon() {
+        SignalGenerator.getInstance().toast("you won",Toast.LENGTH_SHORT);
+        flagWins=true;
+        flagRating=true;
+        FirebaseDatabase.getInstance().getReference("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        int wins=0;
+                        int rating=0;
 
-    public void gameOver(){
+                        for (DataSnapshot value : snapshot.getChildren()){
+                            if (value.getKey().equals("wins")&&flagWins) {
+                                wins = Integer.parseInt(value.getValue().toString());
+                                value.getRef().setValue(wins+1+"");
+                                flagWins=false;
+                            }
+
+                        }
+                        for (DataSnapshot value : snapshot.getChildren()){
+                            if (value.getKey().equals("rating")&&flagRating) {
+                                rating = Integer.parseInt(value.getValue().toString());
+                                value.getRef().setValue(rating+3+"");
+                                flagRating=false;
+                            }
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+    }
+    public void gameLost(){
         flagLoses=true;
         flagRating=true;
         FirebaseDatabase.getInstance().getReference("Users")
@@ -329,6 +366,8 @@ public class GameActivity extends Activity {
     }
 
     private void makeMove(int srcI, int srcJ, int dstI, int dstJ,String name) {
+        int srcColor=gameManager.getBoard()[srcI][srcJ].getColor();
+        isGameOver(srcColor,dstI,dstJ);
         gameManager.move(srcI,srcJ,dstI,dstJ);
         updateServerMove(srcI,srcJ,dstI,dstJ,name);
         updateIsMoved(srcI,srcJ);
@@ -337,7 +376,27 @@ public class GameActivity extends Activity {
         resetBackgrounds();
         drawBoard();
 
+
     }
+
+    private void isGameOver(int srcColor,int dstX,int dstY) {
+        Piece piece=gameManager.getPiece(new Point(dstX,dstY));
+        if (piece instanceof King){
+            if (piece.getColor()!=srcColor){
+                gameWon();
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.putExtra(MainActivity.CONID,connectionId);
+                intent.putExtra(MainActivity.CONNECTED,true);
+                myTurn=false;
+                finish();
+                startActivity(intent);
+
+            }
+        }
+
+    }
+
+
 
     private void updateIsMoved(int x, int y) {
         Piece piece = gameManager.getPiece(x,y);
